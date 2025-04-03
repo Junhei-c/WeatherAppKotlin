@@ -39,7 +39,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        val factory = WeatherViewModelFactory(WeatherRepository(), WeatherUiMapper())
+        val factory = WeatherViewModelFactory(
+            WeatherRepository(),
+            WeatherUiMapper()
+        )
         viewModel = ViewModelProvider(this, factory)[WeatherViewModel::class.java]
+    }
+
+    fun updateSelectedDate(formattedNow: String) {
+
     }
 }

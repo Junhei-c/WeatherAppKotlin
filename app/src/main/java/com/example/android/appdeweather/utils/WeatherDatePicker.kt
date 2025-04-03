@@ -9,6 +9,14 @@ import java.util.*
 
 object WeatherDatePicker {
     fun setup(context: Context, binding: ActivityMainBinding, viewModel: WeatherViewModel) {
+
+        val now = Calendar.getInstance().time
+        val formattedNow = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(now)
+
+        binding.dateField.setText(formattedNow)
+        viewModel.updateSelectedDate(formattedNow)
+
+
         binding.dateField.setOnClickListener {
             val calendar = Calendar.getInstance()
             val datePickerDialog = DatePickerDialog(context,
@@ -27,3 +35,4 @@ object WeatherDatePicker {
         }
     }
 }
+

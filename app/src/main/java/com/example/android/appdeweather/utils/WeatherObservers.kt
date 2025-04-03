@@ -1,9 +1,10 @@
 package com.example.android.appdeweather.utils
 
+import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import com.example.android.appdeweather.databinding.ActivityMainBinding
-import com.example.android.appdeweather.viewmodel.WeatherViewModel
 import com.example.android.appdeweather.looks.WeatherAdapter
+import com.example.android.appdeweather.viewmodel.WeatherViewModel
 
 object WeatherObservers {
     fun observe(
@@ -12,18 +13,24 @@ object WeatherObservers {
         viewModel: WeatherViewModel,
         adapter: WeatherAdapter
     ) {
+
+        viewModel.filteredWeatherUi.observe(owner) { list ->
+            adapter.updateData(list)
+        }
+
+
+        viewModel.isLoading.observe(owner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+
+        viewModel.error.observe(owner) { errorMsg ->
+            binding.errorText.text = errorMsg ?: ""
+            binding.errorText.visibility = if (errorMsg != null) View.VISIBLE else View.GONE
+        }
+
         viewModel.weatherUi.observe(owner) { adapter.updateData(it) }
-
-        viewModel.isLoading.observe(owner) {
-            binding.progressBar.visibility = if (it) android.view.View.VISIBLE else android.view.View.GONE
-        }
-
-        viewModel.error.observe(owner) {
-            binding.errorText.visibility = if (it != null) android.view.View.VISIBLE else android.view.View.GONE
-            binding.errorText.text = it ?: ""
-        }
-
-        viewModel.filteredWeatherUi.observe(owner) { adapter.updateData(it) }
     }
 }
+
 

@@ -1,36 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
 
     <EditText
         android:id="@+id/dateField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:hint="Select date"
         android:focusable="false"
         android:clickable="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:inputType="none"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:layout_marginBottom="12dp"/>
 
 
     <ProgressBar
         android:id="@+id/progressBar"
-        android:visibility="gone"
-        android:layout_gravity="center"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:layout_marginBottom="12dp"/>
+
 
     <TextView
         android:id="@+id/errorText"
-        android:textColor="@android:color/holo_red_dark"
-        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/weatherRecycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        tools:listitem="@layout/item_weather"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"/>
 </LinearLayout>
