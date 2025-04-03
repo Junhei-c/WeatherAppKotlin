@@ -1,59 +1,88 @@
 package com.example.android.appdeweather.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.android.appdeweather.model.Reading
+import androidx.lifecycle.*
+import com.example.android.appdeweather.looks.UiWeatherModel
 import com.example.android.appdeweather.repository.WeatherRepository
-import kotlinx.coroutines.flow.*
+import com.example.android.appdeweather.mapper.WeatherUiMapper
 import kotlinx.coroutines.launch
 
-class WeatherViewModel : ViewModel() {
+class WeatherViewModel(
+    private val repository: WeatherRepository,
+    private val uiMapper: WeatherUiMapper
+) : ViewModel() {
 
-    private val repository = WeatherRepository()
+    private val _weatherUi = MutableLiveData<List<UiWeatherModel>>()
+    val weatherUi: LiveData<List<UiWeatherModel>> = _weatherUi
 
-    private val _readings = MutableStateFlow<List<Reading>>(emptyList())
-    val readings: StateFlow<List<Reading>> = _readings
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
 
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    private val _searchQuery = MutableLiveData("")
+    val searchQuery: LiveData<String> = _searchQuery
 
+    private val _selectedDate = MutableLiveData<String>()
+    val selectedDate: LiveData<String> = _selectedDate
 
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
+    private val _filteredWeatherUi = MediatorLiveData<List<UiWeatherModel>>()
+    val filteredWeatherUi: LiveData<List<UiWeatherModel>> = _filteredWeatherUi
 
+    init {
+        _filteredWeatherUi.addSource(_weatherUi) { updateFilter() }
+        _filteredWeatherUi.addSource(_searchQuery) { updateFilter() }
+        _filteredWeatherUi.addSource(_selectedDate) { updateFilter() }
+    }
 
-    val filteredReadings: StateFlow<List<Reading>> = combine(_readings, _searchQuery) { readings, query ->
-        if (query.isBlank()) {
-            readings
-        } else {
-            readings.filter {
-                it.station.name.contains(query, ignoreCase = true)
-            }
+    private fun updateFilter() {
+        val original = _weatherUi.value ?: emptyList()
+        val date = _selectedDate.value
+        val query = _searchQuery.value ?: ""
+
+        var filtered = original
+
+        if (!date.isNullOrBlank()) {
+            filtered = filtered.filter { it.date.contains(date) }
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+        if (query.isNotBlank()) {
+            filtered = filtered.filter { it.name.contains(query, ignoreCase = true) }
+        }
+
+        _filteredWeatherUi.value = filtered
+    }
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
+    fun updateSelectedDate(date: String) {
+        _selectedDate.value = date
+    }
 
-    fun getWeather() {
+    fun fetchWeather() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val response = repository.fetchWeather()
                 val record = response.data.records.firstOrNull()
-                _readings.value = record?.item?.readings ?: emptyList()
+                val readings = record?.item?.readings ?: emptyList()
+                val datetime = record?.datetime ?: ""
+
+                val mappedList = readings.map { reading ->
+                    uiMapper.mapToUi(reading, datetime)
+                }
+
+                _weatherUi.value = mappedList
                 _error.value = null
             } catch (e: Exception) {
-                _error.value = e.message
+                _error.value = e.message ?: "Unknown Error"
             }
             _isLoading.value = false
         }
     }
 }
+
+
 
