@@ -1,12 +1,13 @@
 package com.example.android.appdeweather.looks
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.appdeweather.R
-import com.example.android.appdeweather.looks.UiWeatherModel
+
 
 class WeatherAdapter(private var list: List<UiWeatherModel>) :
     RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() {
@@ -22,6 +23,7 @@ class WeatherAdapter(private var list: List<UiWeatherModel>) :
         return WeatherViewHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
         val item = list[position]
         holder.name.text = item.name
@@ -31,6 +33,7 @@ class WeatherAdapter(private var list: List<UiWeatherModel>) :
 
     override fun getItemCount(): Int = list.size
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateData(newList: List<UiWeatherModel>) {
         list = newList
         notifyDataSetChanged()

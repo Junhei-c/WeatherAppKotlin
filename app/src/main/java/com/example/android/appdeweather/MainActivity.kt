@@ -5,18 +5,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.appdeweather.databinding.ActivityMainBinding
-import com.example.android.appdeweather.utils.WeatherObservers
+import com.example.android.appdeweather.looks.WeatherAdapter
 import com.example.android.appdeweather.mapper.WeatherUiMapper
 import com.example.android.appdeweather.repository.WeatherRepository
-import com.example.android.appdeweather.looks.WeatherAdapter
+import com.example.android.appdeweather.utils.WeatherObservers
 import com.example.android.appdeweather.viewmodel.WeatherViewModel
 import com.example.android.appdeweather.viewmodel.WeatherViewModelFactory
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: WeatherViewModel
     private lateinit var adapter: WeatherAdapter
+    private val uiScope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupViewModel()
         WeatherObservers.observe(this, binding, viewModel, adapter)
+
 
         viewModel.fetchWeather()
     }
@@ -43,4 +47,11 @@ class MainActivity : AppCompatActivity() {
         )
         viewModel = ViewModelProvider(this, factory)[WeatherViewModel::class.java]
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        uiScope.cancel()
+    }
 }
+
+

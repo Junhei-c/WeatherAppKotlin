@@ -1,9 +1,11 @@
 package com.example.android.appdeweather.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.android.appdeweather.looks.UiWeatherModel
-import com.example.android.appdeweather.mapper.WeatherUiMapper
 import com.example.android.appdeweather.repository.WeatherRepository
+import com.example.android.appdeweather.mapper.WeatherUiMapper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(
@@ -21,25 +23,36 @@ class WeatherViewModel(
     val error: LiveData<String?> = _error
 
     fun fetchWeather() {
-        viewModelScope.launch {
-            _isLoading.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.postValue(true)
             try {
+                val start = System.currentTimeMillis()
                 val response = repository.fetchWeather()
-                val record = response?.data?.records?.firstOrNull()
+                val end = System.currentTimeMillis()
+                Log.d("WeatherFetch", "Loaded in ${end - start} ms")
 
-                val readings = record?.item?.readings ?: emptyList()
-                val datetime = record?.datetime ?: ""
+                val items = response?.items ?: emptyList()
 
-                val mappedList = readings.map { reading ->
-                    uiMapper.mapToUi(reading, datetime)
+                if (items.isNotEmpty()) {
+                    val record = items.first()
+                    val readings = record.readings
+                    val datetime = record.datetime
+
+                    val mappedList = readings.map { reading ->
+                        uiMapper.mapToUi(reading, datetime)
+                    }
+
+                    _weatherUi.postValue(mappedList)
+                    _error.postValue(null)
+                } else {
+                    _error.postValue("No weather data available")
                 }
-
-                _weatherUi.value = mappedList
-                _error.value = null
             } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error"
+                _error.postValue(e.message ?: "Unknown Error")
+                Log.e("WeatherFetch", "Error: ", e)
+            } finally {
+                _isLoading.postValue(false)
             }
-            _isLoading.value = false
         }
     }
 }
