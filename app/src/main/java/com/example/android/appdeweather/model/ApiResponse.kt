@@ -5,10 +5,10 @@ data class ApiResponse(
 )
 
 data class DataWrapper(
-    val records: List<Record>
+    val records: List<WeatherRecord>
 )
 
-data class Record(
+data class WeatherRecord(
     val datetime: String,
     val item: WeatherItem
 )
@@ -16,5 +16,25 @@ data class Record(
 data class WeatherItem(
     val readings: List<Reading>
 )
+
+data class Reading(
+    val station: Station,
+    val location: Location,
+    val wbgt: String,
+    val heatStress: String
+)
+
+data class Station(
+    val id: String,
+    val name: String,
+    val townCenter: String
+)
+
+data class Location(
+    val latitude: String,
+    val longitude: String
+)
+
+
 
 

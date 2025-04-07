@@ -1,36 +1,31 @@
 package com.example.android.appdeweather.utils
 
-import android.view.View
-import androidx.lifecycle.LifecycleOwner
+import androidx.appcompat.app.AppCompatActivity
 import com.example.android.appdeweather.databinding.ActivityMainBinding
 import com.example.android.appdeweather.looks.WeatherAdapter
 import com.example.android.appdeweather.viewmodel.WeatherViewModel
 
 object WeatherObservers {
     fun observe(
-        owner: LifecycleOwner,
+        activity: AppCompatActivity,
         binding: ActivityMainBinding,
         viewModel: WeatherViewModel,
         adapter: WeatherAdapter
     ) {
-
-        viewModel.filteredWeatherUi.observe(owner) { list ->
-            adapter.updateData(list)
+        viewModel.weatherUi.observe(activity) { data ->
+            adapter.updateData(data)
         }
 
-
-        viewModel.isLoading.observe(owner) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        viewModel.isLoading.observe(activity) { loading ->
+            binding.progressBar.visibility = if (loading) android.view.View.VISIBLE else android.view.View.GONE
         }
 
-
-        viewModel.error.observe(owner) { errorMsg ->
+        viewModel.error.observe(activity) { errorMsg ->
+            binding.errorText.visibility = if (errorMsg != null) android.view.View.VISIBLE else android.view.View.GONE
             binding.errorText.text = errorMsg ?: ""
-            binding.errorText.visibility = if (errorMsg != null) View.VISIBLE else View.GONE
         }
-
-        viewModel.weatherUi.observe(owner) { adapter.updateData(it) }
     }
 }
+
 
 

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.android.appdeweather.databinding.ActivityMainBinding
 import com.example.android.appdeweather.utils.WeatherObservers
-import com.example.android.appdeweather.utils.WeatherDatePicker
 import com.example.android.appdeweather.mapper.WeatherUiMapper
 import com.example.android.appdeweather.repository.WeatherRepository
 import com.example.android.appdeweather.looks.WeatherAdapter
@@ -27,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupViewModel()
         WeatherObservers.observe(this, binding, viewModel, adapter)
-        WeatherDatePicker.setup(this, binding, viewModel)
 
         viewModel.fetchWeather()
     }
@@ -44,9 +42,5 @@ class MainActivity : AppCompatActivity() {
             WeatherUiMapper()
         )
         viewModel = ViewModelProvider(this, factory)[WeatherViewModel::class.java]
-    }
-
-    fun updateSelectedDate(formattedNow: String) {
-
     }
 }
