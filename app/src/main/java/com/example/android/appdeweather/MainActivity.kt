@@ -11,6 +11,10 @@ import com.example.android.appdeweather.repository.WeatherRepository
 import com.example.android.appdeweather.looks.WeatherAdapter
 import com.example.android.appdeweather.viewmodel.WeatherViewModel
 import com.example.android.appdeweather.viewmodel.WeatherViewModelFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,9 +29,14 @@ class MainActivity : AppCompatActivity() {
 
         setupRecyclerView()
         setupViewModel()
-        WeatherObservers.observe(this, binding, viewModel, adapter)
 
-        viewModel.fetchWeather()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            viewModel.fetchWeather()
+            withContext(Dispatchers.Main) {
+                WeatherObservers.observe(this@MainActivity, binding, viewModel, adapter)
+            }
+        }
     }
 
     private fun setupRecyclerView() {
