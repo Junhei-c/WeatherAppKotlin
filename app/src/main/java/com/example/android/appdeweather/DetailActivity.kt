@@ -20,7 +20,10 @@ class DetailActivity : AppCompatActivity() {
         val latitude = intent.getDoubleExtra("latitude", 0.0)
         val longitude = intent.getDoubleExtra("longitude", 0.0)
         val heatStress = intent.getStringExtra("heatStress")
+<<<<<<< HEAD
         val datetime = intent.getStringExtra("datetime")
+=======
+>>>>>>> origin/feature/Base_xml
 
 
         binding.nameText.text = "Name: $name"
@@ -29,6 +32,9 @@ class DetailActivity : AppCompatActivity() {
         binding.idText.text = "Station ID: $id"
         binding.geoText.text = "Location: ($latitude, $longitude)"
         binding.heatStressText.text = "Heat Stress Level: $heatStress"
+<<<<<<< HEAD
         binding.datetimeText.text = "Datetime: $datetime"
+=======
+>>>>>>> origin/feature/Base_xml
     }
 }
