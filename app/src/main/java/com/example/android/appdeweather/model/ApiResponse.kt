@@ -1,7 +1,11 @@
 package com.example.android.appdeweather.model
 
 data class ApiResponse(
-    val items: List<WeatherRecord>
+    val data: DataWrapper
+)
+
+data class DataWrapper(
+    val records: List<WeatherRecord>
 )
 
 data class WeatherRecord(
@@ -30,5 +34,6 @@ data class Location(
     val latitude: String,
     val longitude: String
 )
+
 
 
