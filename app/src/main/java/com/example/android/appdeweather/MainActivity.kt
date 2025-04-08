@@ -1,7 +1,10 @@
 package com.example.android.appdeweather
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +13,7 @@ import com.example.android.appdeweather.looks.UiWeatherModel
 import com.example.android.appdeweather.looks.WeatherAdapter
 import com.example.android.appdeweather.mapper.WeatherUiMapper
 import com.example.android.appdeweather.repository.WeatherRepository
+import com.example.android.appdeweather.utils.NetworkUtils
 import com.example.android.appdeweather.utils.WeatherDatePicker
 import com.example.android.appdeweather.utils.WeatherObservers
 import com.example.android.appdeweather.viewmodel.WeatherViewModel
@@ -24,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: WeatherViewModel
     private lateinit var adapter: WeatherAdapter
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -34,10 +39,14 @@ class MainActivity : AppCompatActivity() {
         WeatherObservers.observe(this, binding, viewModel, adapter)
         WeatherDatePicker.setup(this, binding, viewModel)
 
-        // Fetch current date by default
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         binding.dateField.setText(today)
-        viewModel.fetchWeather(today)
+
+        if (NetworkUtils.isConnected(this)) {
+            viewModel.fetchWeather(today)
+        } else {
+            showNetworkError()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -49,7 +58,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.swipeRefresh.setOnRefreshListener {
             val selectedDate = binding.dateField.text.toString()
-            viewModel.fetchWeather(selectedDate)
+            if (NetworkUtils.isConnected(this)) {
+                viewModel.fetchWeather(selectedDate)
+            } else {
+                showNetworkError()
+            }
             binding.swipeRefresh.isRefreshing = false
         }
     }
@@ -74,6 +87,11 @@ class MainActivity : AppCompatActivity() {
             putExtra("datetime", weatherItem.date)
         }
         startActivity(intent)
+    }
+
+    private fun showNetworkError() {
+        binding.errorText.visibility = View.VISIBLE
+        binding.errorText.text = "No Internet Connection"
     }
 }
 
