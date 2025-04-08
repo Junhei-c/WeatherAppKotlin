@@ -1,10 +1,12 @@
 package com.example.android.appdeweather.viewmodel
 
-import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.android.appdeweather.looks.UiWeatherModel
-import com.example.android.appdeweather.repository.WeatherRepository
 import com.example.android.appdeweather.mapper.WeatherUiMapper
+import com.example.android.appdeweather.repository.WeatherRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -12,6 +14,15 @@ class WeatherViewModel(
     private val repository: WeatherRepository,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
+
+    private val _selectedDate = MutableLiveData<String>()
+    val selectedDate: LiveData<String> = _selectedDate
+
+    fun updateSelectedDate(date: String) {
+        _selectedDate.value = date
+        fetchWeather(date)
+    }
+
 
     private val _weatherUi = MutableLiveData<List<UiWeatherModel>>()
     val weatherUi: LiveData<List<UiWeatherModel>> = _weatherUi
@@ -22,34 +33,23 @@ class WeatherViewModel(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    fun fetchWeather() {
+    fun fetchWeather(date: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.postValue(true)
             try {
-                val start = System.currentTimeMillis()
-                val response = repository.fetchWeather()
-                val end = System.currentTimeMillis()
-                Log.d("WeatherFetch", "Loaded in ${end - start} ms")
+                val response = repository.fetchWeather(date)
+                val record = response?.data?.records?.firstOrNull()
+                val readings = record?.item?.readings ?: emptyList()
+                val datetime = record?.datetime ?: ""
 
-                val items = response?.items ?: emptyList()
-
-                if (items.isNotEmpty()) {
-                    val record = items.first()
-                    val readings = record.readings
-                    val datetime = record.datetime
-
-                    val mappedList = readings.map { reading ->
-                        uiMapper.mapToUi(reading, datetime)
-                    }
-
-                    _weatherUi.postValue(mappedList)
-                    _error.postValue(null)
-                } else {
-                    _error.postValue("No weather data available")
+                val mappedList = readings.map {
+                    uiMapper.mapToUi(it, datetime)
                 }
+
+                _weatherUi.postValue(mappedList)
+                _error.postValue(null)
             } catch (e: Exception) {
-                _error.postValue(e.message ?: "Unknown Error")
-                Log.e("WeatherFetch", "Error: ", e)
+                _error.postValue("Error: ${e.localizedMessage}")
             } finally {
                 _isLoading.postValue(false)
             }

@@ -34,16 +34,15 @@
         android:textSize="18sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-<<<<<<< HEAD
+
 
     <TextView
         android:id="@+id/datetimeText"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Datetime:"
-        android:textSize="16sp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"/>
 
-=======
->>>>>>> origin/feature/Base_xml
+
 </LinearLayout>

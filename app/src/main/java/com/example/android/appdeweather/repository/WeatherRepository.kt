@@ -6,4 +6,3 @@ class WeatherRepository {
     suspend fun fetchWeather(date: String) =
         RetrofitInstance.api.getWeather(date = date).body()
 }
-
